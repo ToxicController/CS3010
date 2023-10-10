@@ -3,7 +3,7 @@
  * Author: Thomas Tejedor
  * 
  * Purpose: Create a program that solves a set of linear equations
- *    using Gaussian elimination. The list of 
+ *    using Gaussian elimination
  * 
  */
 
