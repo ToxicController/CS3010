@@ -12,15 +12,15 @@ import java.lang.Math;
 public class GaussianElimination {
 
     int n;
-    int[][] coeffArr;
+    double[][] coeffArr;
     int[] indexArr;
-    int[] scaleVectorArr;
+    double[] scaleVectorArr;
 
-    public GaussianElimination(int n, int[][] coeffArr)  {
+    public GaussianElimination(int n, double[][] coeffArr)  {
         this.n = n;
         this.coeffArr = coeffArr;
         indexArr = new int[n];
-        scaleVectorArr = new int[n];
+        scaleVectorArr = new double[n];
         getScaleVectors();
     }
 
@@ -28,7 +28,7 @@ public class GaussianElimination {
 
         for(int i = 0; i < n; i++) {
             indexArr[i] = i; 
-            int maxCoeff = coeffArr[i][0];
+            double maxCoeff = coeffArr[i][0];
             
             for(int j = 0; j < n; j++) {
                 if( maxCoeff < Math.abs(coeffArr[i][j]))
@@ -40,17 +40,17 @@ public class GaussianElimination {
     }
 
     private String getCurrentMatrix() {
-        String output = "Current Matrix = \n[";
+        String output = "\nCurrent Matrix = \n[";
         for(int i = 0; i < n; i++) {
             for(int j = 0; j < (n+1); j++) {
-                if(i == (n-1) && j == (n-1)) {
+                if(i == (n-1) && j == (n)) {
                     output += coeffArr[i][j] + "]\n"; 
                 }
-                else if(j == (n-1)) {
+                else if(j == (n)) {
                     output += coeffArr[i][j] + ",\n";
                 }
                 else {
-                    output += coeffArr[i][j] + ",";
+                    output += coeffArr[i][j] + ", ";
                 }
             }
         }
@@ -62,59 +62,66 @@ public class GaussianElimination {
 
         String output = "";
 
+        output += getCurrentMatrix(); 
         for (int i = 0; i < (n-1); i++) {
-            output += getCurrentMatrix();
 
-            output = "Scale Ratios = [";
-            int pivotRow = 0;
-            int maxRatio = 0; 
+            output += "\nScale Ratios = [";
+            int pivotRowIndex = i;
+            double maxRatio = 0; 
 
             for(int k = i; k < n; k++) {
 
-                int currRow = indexArr[k];
-                int currRatio = Math.abs(coeffArr[currRow][k] / scaleVectorArr[currRow]);
-
+                int currRow = k;
+                double currRatio = Math.abs(coeffArr[currRow][k] / (double)scaleVectorArr[currRow]);
 
                 if(k != n-1)
                     output += currRatio + ", ";
                 else
                     output += currRatio + "]\n"; 
 
-
                 if(currRatio > maxRatio) {
                     maxRatio = currRatio;
-                    pivotRow = currRow;
+                    pivotRowIndex = k;
                 }
 
             }
+            
+            output += "The pivot row = " + (indexArr[pivotRowIndex] + 1) + "\n";
 
-            output += "The pivot row = " + (pivotRow + 1);
-
-            indexArr[pivotRow] = indexArr[i];
+            int pivotRow = indexArr[pivotRowIndex];
+            indexArr[pivotRowIndex] = indexArr[i];
             indexArr[i] = pivotRow;
-
-            for(int currIndex: indexArr) {
-                System.out.print(currIndex + ", ");
-            }
-
             
             for(int k = i + 1; k < n; k++) {
-                int currIndex = indexArr[k];
-                System.out.println(coeffArr[currIndex][i]);
-                int xMult = (coeffArr[pivotRow][k]/coeffArr[currIndex][i]);
+                int currRow = indexArr[k];
+                double xMult = (coeffArr[currRow][i]/coeffArr[pivotRow][i]);
 
-                coeffArr[currIndex][k] = xMult;
+                coeffArr[currRow][i] = 0;
 
-                for(int j = i + 1; j < n; j++) {
-                    coeffArr[currIndex][j] = coeffArr[currIndex][j] - xMult*(coeffArr[currIndex][k]);
+                for(int j = i + 1; j < (n+1); j++) {
+                    coeffArr[currRow][j] = coeffArr[currRow][j] - xMult*(coeffArr[pivotRow][j]);
                 }
             }
-            System.out.println("yo");
 
-
+            output += getCurrentMatrix();
 
         }
 
         return output; 
+    }
+
+    public double[] getSolution(){
+        double[] solution = new double[n];
+        solution[n-1] = (coeffArr[indexArr[n-1]][n])/(coeffArr[indexArr[n-1]][n-1]);
+        
+        for (int i = n-2; i >= 0; i--){
+            double sum = coeffArr[indexArr[i]][n];
+            for (int j = i+1; j < n ; j++) {
+                sum -= (coeffArr[indexArr[i]][j]*solution[j]); 
+            }
+            solution[i] = sum/coeffArr[indexArr[i]][i]; 
+        }
+
+        return solution;
     }
 }
